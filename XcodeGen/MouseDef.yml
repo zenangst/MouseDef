@@ -1,0 +1,23 @@
+targets:
+  MouseDef:
+    deploymentTarget: "10.15"
+    type: application
+    platform: macOS
+    configs:
+      Debug: debug
+      Release: release
+    scheme:
+    sources:
+      - path: Source
+      - path: Resources
+    configs:
+      Debug: debug
+      Release: release
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "com.zenangst.MouseDef"
+        MARKETING_VERSION: "0.0.1"
+        CURRENT_PROJECT_VERSION: 0
+        INFOPLIST_FILE: "Resources/Info.plist"
+    dependencies:
+      - sdk: Cocoa.framework
