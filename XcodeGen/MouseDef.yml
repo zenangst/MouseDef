@@ -19,5 +19,6 @@ targets:
         MARKETING_VERSION: "0.0.1"
         CURRENT_PROJECT_VERSION: 0
         INFOPLIST_FILE: "Resources/Info.plist"
+        ASSETCATALOG_COMPILER_APPICON_NAME: "Assets"
     dependencies:
       - sdk: Cocoa.framework
