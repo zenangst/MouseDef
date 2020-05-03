@@ -13,6 +13,11 @@ holding down modifier keys.
 
 MouseDef uses the accessibliity features in macOS in order to gain information about the cursors current position and to resolve which window is underneat the cursor in addition to setting the new position and/or size as the mouse cursor moves.
 
+#### Default keyboard shortcuts are:
+
+- **fn + ⌘** : Move window
+- **⇧ + ⌘** : Resize window
+
 ### Features
 
 - [ ] Customizable keyboard shortcut keys
