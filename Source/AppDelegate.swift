@@ -1,14 +1,15 @@
 import Cocoa
 
-class AppDelegate: NSObject, NSApplicationDelegate {
-  lazy var accessibilityController = AccessibilityController()
-  lazy var monitorController = MonitorController()
-  lazy var mouseController = MouseController(accessibilityController: accessibilityController,
-                                             resizeBehavior: .quadrant)
+class AppDelegate: NSObject, NSApplicationDelegate, MenubarControllerDelegate {
+  var appContext: AppContext?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     askForAccessibilityIfNeeded()
-    monitorController.start(mouseController.handleState(_:))
+
+    let appContext = AppContext()
+    appContext.monitorController.start(appContext.mouseController.handleState(_:))
+    appContext.menuController.delegate = self
+    self.appContext = appContext
   }
 
   private func askForAccessibilityIfNeeded() {
@@ -29,6 +30,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     alert.alertStyle = .warning
     alert.addButton(withTitle: "Quit")
     alert.runModal()
+    NSApp.terminate(nil)
+  }
+
+  func menubarController(_ controller: MenuBarController, didTapQuitApplication quitApplicationMenuItem: NSMenuItem) {
     NSApp.terminate(nil)
   }
 }

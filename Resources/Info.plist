@@ -34,5 +34,7 @@
 	<true/>
 	<key>com.apple.security.automation.apple-events</key>
 	<true/>
+	<key>LSUIElement</key>
+  <true/>
 </dict>
 </plist>
