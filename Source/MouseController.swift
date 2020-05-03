@@ -59,6 +59,7 @@ final class MouseController {
           self.monitor = monitor
         } else {
           location.y -= 1
+          keepSearching = location.y > 0
         }
       }
     }
