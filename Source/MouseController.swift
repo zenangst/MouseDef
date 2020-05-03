@@ -103,7 +103,10 @@ final class MouseController {
       elementWindow.size = windowSize
     case .quadrant:
       guard var windowFrame = windowFrameCache ?? elementWindow.frame else { return }
-      switch windowFrame.quadrant(for: point) {
+
+      let quadrant = windowFrame.quadrant(for: point)
+
+      switch quadrant {
       case .first:
         windowFrame.origin.x -= newDelta.x
         windowFrame.size.width += newDelta.x
@@ -138,11 +141,11 @@ fileprivate enum Quadrant {
 fileprivate extension CGRect {
   func quadrant(for point: CGPoint) -> Quadrant {
     var quadrant = 0
-    if point.x > self.width / 2 {
+    if point.x - self.origin.x > self.width / 2 {
       quadrant += 1
     }
 
-    if point.y > self.height / 2 {
+    if point.y - self.origin.y > self.height / 2 {
       quadrant += 2
     }
 
