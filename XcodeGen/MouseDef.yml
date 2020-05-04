@@ -22,6 +22,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: "Assets"
         DEVELOPMENT_TEAM: "E23HUP39A3"
         ENABLE_HARDENED_RUNTIME: "YES"
+        CODE_SIGN_IDENTITY: "-"
     dependencies:
       - sdk: Cocoa.framework
     entitlements:
