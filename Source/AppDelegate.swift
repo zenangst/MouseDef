@@ -4,7 +4,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, MenubarControllerDelegate {
   var appContext: AppContext?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
-    askForAccessibilityIfNeeded()
+//    askForAccessibilityIfNeeded()
 
     let appContext = AppContext()
     appContext.monitorController.start(appContext.mouseController.handleState(_:))
