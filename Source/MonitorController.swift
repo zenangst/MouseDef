@@ -11,6 +11,7 @@ final class MonitorController {
     monitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { event in
       if event.modifierFlags.contains(.capsLock) || event.modifierFlags.contains(.option) ||
         event.modifierFlags.contains(.control) {
+        handler(.ended)
         return
       }
 

@@ -35,31 +35,32 @@ final class MouseController {
     /// be properly hooked into. An example is the `Maps.app` which normally cannot be
     /// managed using accessibility elements.
     while keepSearching {
-      do {
-        if let element = try? accessibilityController.element(at: location),
-          let elementWindow = element.window {
-          keepSearching = false
-          switch state {
-          case .ended:
-            endSession()
-            return
-          case .drag:
-            monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
-              guard let mouse = Mouse() else { self.endSession(); return }
-              self.move(elementWindow, with: mouse)
-              self.delta = mouse.location
-            }
-          case .resize:
-            monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
-              guard let mouse = Mouse() else { self.endSession(); return }
-              self.resize(elementWindow, with: mouse)
-              self.delta = mouse.location
-            }
+      if let element = try? accessibilityController.element(at: location),
+        let elementWindow = element.window {
+        keepSearching = false
+        switch state {
+        case .ended:
+          endSession()
+          return
+        case .drag:
+          monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+            guard let mouse = Mouse() else { self.endSession(); return }
+            self.move(elementWindow, with: mouse)
+            self.delta = mouse.location
           }
-          self.monitor = monitor
-        } else {
-          location.y -= 1
-          keepSearching = location.y > 0
+        case .resize:
+          monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+            guard let mouse = Mouse() else { self.endSession(); return }
+            self.resize(elementWindow, with: mouse)
+            self.delta = mouse.location
+          }
+        }
+        self.monitor = monitor
+      } else {
+        location.y -= 1
+        keepSearching = location.y > 0
+        if !keepSearching {
+          endSession()
         }
       }
     }
