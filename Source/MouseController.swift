@@ -10,6 +10,7 @@ final class MouseController {
   private var debugWindow: NSWindow?
   private var delta: CGPoint?
   private var windowFrameCache: CGRect?
+  private var lastQuadrant: Quadrant?
   private let accessibilityController: AccessibilityController
   private let resizeBehavior: MouseResizeBehavior
 
@@ -74,6 +75,7 @@ final class MouseController {
       self.monitor = nil
       self.delta = nil
       self.windowFrameCache = nil
+      self.lastQuadrant = nil
     }
   }
 
@@ -105,7 +107,8 @@ final class MouseController {
     case .quadrant:
       guard var windowFrame = windowFrameCache ?? elementWindow.frame else { return }
 
-      let quadrant = windowFrame.quadrant(for: point)
+      let quadrant = lastQuadrant ?? windowFrame.quadrant(for: point)
+      self.lastQuadrant = quadrant
 
       switch quadrant {
       case .first:
