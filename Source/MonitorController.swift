@@ -5,10 +5,10 @@ final class MonitorController {
     case resize, drag, ended
   }
 
-  private var monitor: Any?
+  private var flagMonitor: Any?
 
   func start(_ handler: @escaping (State) -> Void) {
-    monitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { event in
+    flagMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { event in
       if event.modifierFlags.contains(.capsLock) || event.modifierFlags.contains(.option) ||
         event.modifierFlags.contains(.control) {
         handler(.ended)
@@ -30,7 +30,8 @@ final class MonitorController {
   }
 
   func end() {
-    guard let monitor = monitor else { return }
-    NSEvent.removeMonitor(monitor)
+    if let flagMonitor = flagMonitor {
+      NSEvent.removeMonitor(flagMonitor)
+    }
   }
 }

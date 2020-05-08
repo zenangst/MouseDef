@@ -13,6 +13,7 @@ final class MouseController {
   private var lastQuadrant: Quadrant?
   private let accessibilityController: AccessibilityController
   private let resizeBehavior: MouseResizeBehavior
+  private static var isSearching: Bool = false
 
   init(accessibilityController: AccessibilityController,
        resizeBehavior: MouseResizeBehavior) {
@@ -22,48 +23,53 @@ final class MouseController {
 
   func handleState(_ state: MonitorController.State) {
     var monitor: Any?
+    MouseController.isSearching = state != .ended
 
-    guard let mouse = Mouse() else {
-      endSession()
-      return
-    }
-
-    var location = mouse.location
-    var keepSearching: Bool = true
     /// If no accessibility element can be resolved, keep searching upwards in the
     /// coordinate system until we eventually hit the toolbar of the window.
     /// This should work as a reliable fallback for custom elements that normally cannot
     /// be properly hooked into. An example is the `Maps.app` which normally cannot be
     /// managed using accessibility elements.
-    while keepSearching {
-      if let element = try? accessibilityController.element(at: location),
-        let elementWindow = element.window {
-        keepSearching = false
-        switch state {
-        case .ended:
-          endSession()
-          return
-        case .drag:
-          monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
-            guard let mouse = Mouse() else { self.endSession(); return }
-            self.move(elementWindow, with: mouse)
-            self.delta = mouse.location
-          }
-        case .resize:
-          monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
-            guard let mouse = Mouse() else { self.endSession(); return }
-            self.resize(elementWindow, with: mouse)
-            self.delta = mouse.location
-          }
-        }
-        self.monitor = monitor
-      } else {
-        location.y -= 16
-        keepSearching = location.y > 0
-        if !keepSearching {
-          endSession()
-        }
+    guard let mouse = Mouse(),
+      let elementWindow = findElement(at: mouse.location)?.window else {
+      endSession()
+      return
+    }
+
+    switch state {
+    case .ended:
+      endSession()
+      return
+    case .drag:
+      monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+        guard let mouse = Mouse() else { self.endSession(); return }
+        self.move(elementWindow, with: mouse)
+        self.delta = mouse.location
       }
+    case .resize:
+      monitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+        guard let mouse = Mouse() else { self.endSession(); return }
+        self.resize(elementWindow, with: mouse)
+        self.delta = mouse.location
+      }
+    }
+    self.monitor = monitor
+  }
+
+  func findElement(at location: CGPoint) -> AccessibilityElement? {
+    var location = location
+
+    if let element = try? accessibilityController.element(at: location) {
+      if element.window != nil {
+        return element
+      }
+    }
+
+    if location.y > 0 && MouseController.isSearching {
+      location.y -= 32
+      return findElement(at: location)
+    } else {
+      return nil
     }
   }
 
