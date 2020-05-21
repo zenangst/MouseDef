@@ -36,6 +36,8 @@ final class MouseController {
       return
     }
 
+    self.delta = mouse.location
+
     switch state {
     case .ended:
       endSession()
@@ -86,24 +88,24 @@ final class MouseController {
   }
 
   private func move(_ elementWindow: AccessibilityElement, with mouse: Mouse) {
+    guard var windowPosition = elementWindow.position,
+    let delta = self.delta else { return }
     let point = mouse.location
-
-    guard var windowPosition = elementWindow.position else { return }
-
-    if let delta = self.delta {
-      let newDelta = CGPoint(x: delta.x - point.x, y: delta.y - point.y)
-      windowPosition.x -= newDelta.x
-      windowPosition.y -= newDelta.y
-      elementWindow.position = windowPosition
-    }
+    let x: CGFloat = delta.x.round(nearest: 1.0) - point.x.round(nearest: 1.0)
+    let y: CGFloat = delta.y.round(nearest: 1.0) - point.y.round(nearest: 1.0)
+    let newDelta = CGPoint(x: x, y: y)
+    windowPosition.x -= newDelta.x
+    windowPosition.y -= newDelta.y
+    elementWindow.position = windowPosition
   }
 
   private func resize(_ elementWindow: AccessibilityElement, with mouse: Mouse) {
     guard var windowSize = elementWindow.size,
       let delta = self.delta else { return }
-
     let point = mouse.location
-    let newDelta = CGPoint(x: round(delta.x - point.x), y: round(delta.y - point.y))
+    let x: CGFloat = delta.x.round(nearest: 1.0) - point.x.round(nearest: 1.0)
+    let y: CGFloat = delta.y.round(nearest: 1.0) - point.y.round(nearest: 1.0)
+    let newDelta = CGPoint(x: x, y: y)
 
     switch resizeBehavior {
     case .standard:
@@ -165,4 +167,12 @@ fileprivate extension CGRect {
 
     return .fourth
   }
+}
+
+extension CGFloat {
+    func round(nearest: CGFloat) -> CGFloat {
+        let n = 1 / nearest
+        let numberToRound = self * n
+        return numberToRound.rounded() / n
+    }
 }
