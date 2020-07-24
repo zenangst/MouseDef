@@ -8,7 +8,14 @@ final class MonitorController {
   private var flagMonitor: Any?
 
   func start(_ handler: @escaping (State) -> Void) {
-    flagMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { event in
+    flagMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyUp, .keyDown]) {
+      event in
+
+      if event.type != .flagsChanged {
+        handler(.ended)
+        return
+      }
+
       let dragModifiers: NSEvent.ModifierFlags = [.function, .command]
       let resizeModifiers: NSEvent.ModifierFlags = [.shift, .command]
 
