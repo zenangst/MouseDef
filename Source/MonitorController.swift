@@ -8,9 +8,16 @@ final class MonitorController {
   private var flagMonitor: Any?
 
   func start(_ handler: @escaping (State) -> Void) {
+    /// Check for `.keyUp` and `.keyDown` in addition to `.flagsChanged`.
+    /// This should eliminate the bug where the resize and move operation gets
+    /// stuck, it would also lead to a more user friendly experience when the
+    /// users have the default keys bound to different system actions such as
+    /// taking screenshots.
     flagMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyUp, .keyDown]) {
       event in
-
+      /// The move/resize session would start as it did previously
+      /// but it would be cancelled out if the user taps an additional key.
+      /// This should be more inline with what the user wants to achieve.
       if event.type != .flagsChanged {
         handler(.ended)
         return
