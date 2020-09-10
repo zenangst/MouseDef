@@ -9,7 +9,7 @@
 MouseDef is a Mac desktop utility that lets you move and resize windows by
 holding down modifier keys.
 
-### How it works
+## How it works
 
 MouseDef uses the accessibility features in macOS in order to gain information about the cursor's current position and to resolve which window is underneath the cursor in addition to setting the new position and/or size as the mouse cursor moves.
 
@@ -39,7 +39,7 @@ open -a "Xcode" MouseDef.xcodeproj
 
 If you want to support the development of this framework, you can do so by becoming a [sponsor](https://github.com/sponsors/zenangst). ❤️
 
-### Contributing
+## Contributing
 
 If you want to contribute to making MouseDef the go to a window management tool,
 there a multiple ways of contributing.
@@ -48,6 +48,6 @@ there a multiple ways of contributing.
 - If you want to be next level awesome, you can always make a PR to the project with a fix for the issue and it will be reviewed when life allows.
 - If you simply enjoy the product and want to show your general appreciation, you can just give a small shoutout on [Twitter](https://twitter.com/zenangst).
 
-### Credit
+## Credit
 
 A big shout out to [Keith](https://github.com/keith) for open sourcing [ModMove](https://github.com/keith/ModMove) which was a huge inspiration when this application came into fruition.
