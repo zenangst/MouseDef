@@ -35,6 +35,10 @@ xcodegen
 open -a "Xcode" MouseDef.xcodeproj
 ```
 
+## Supporting the project
+
+If you want to support the development of this framework, you can do so by becoming a [sponsor](https://github.com/sponsors/zenangst). ❤️
+
 ### Contributing
 
 If you want to contribute to making MouseDef the go to a window management tool,
