@@ -34,3 +34,6 @@ xcuserdata/
 *.xcodeproj
 *.xcworkspace
 Pods/
+.env
+Build/
+exportOptions.plist
