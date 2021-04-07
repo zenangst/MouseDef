@@ -12,7 +12,10 @@ include:
   - path: XcodeGen/MouseDef.yml
     relativePaths: false
 fileGroups:
-  - README.md
-  - project.yml
-  - XcodeGen
+  - .env
   - .gitignore
+  - README.md
+  - Scripts
+  - XcodeGen
+  - build_pipeline.sh
+  - project.yml
