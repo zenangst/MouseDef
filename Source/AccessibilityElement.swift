@@ -1,6 +1,8 @@
 import Cocoa
 
 final class AccessibilityElement {
+  private let kAXEnhancedUserInterface: String = "AXEnhancedUserInterface"
+
   enum AccessibilityElementError: Error {
     case elementMissing
   }
@@ -16,8 +18,21 @@ final class AccessibilityElement {
     }
     set {
       if let newValue = newValue {
+        let app = application()
+        var enhancedUserInterfaceEnabled: Bool? = nil
+
+        // Apply `enhancedUserInterfaceEnabled` fix based on https://github.com/rxhanson/Rectangle/pull/285
+        if let app = app {
+          enhancedUserInterfaceEnabled = app.isEnhancedUserInterfaceEnabled()
+          AXUIElementSetAttributeValue(app.elementReference, kAXEnhancedUserInterface as CFString, kCFBooleanFalse)
+        }
+
         position = newValue.origin
         size = newValue.size
+
+        if let app = app, enhancedUserInterfaceEnabled == true {
+          AXUIElementSetAttributeValue(app.elementReference, kAXEnhancedUserInterface as CFString, kCFBooleanTrue)
+        }
       }
     }
   }
@@ -26,7 +41,7 @@ final class AccessibilityElement {
     get { return value(for: .position) }
     set {
       if let value = AXValue.from(value: newValue, type: .cgPoint) {
-          AXUIElementSetAttributeValue(self.elementReference, kAXPositionAttribute as CFString, value)
+        AXUIElementSetAttributeValue(self.elementReference, kAXPositionAttribute as CFString, value)
       }
     }
   }
@@ -35,7 +50,7 @@ final class AccessibilityElement {
     get { return value(for: .size) }
     set {
       if let value = AXValue.from(value: newValue, type: .cgSize) {
-          AXUIElementSetAttributeValue(self.elementReference, kAXSizeAttribute as CFString, value)
+        AXUIElementSetAttributeValue(self.elementReference, kAXSizeAttribute as CFString, value)
       }
     }
   }
@@ -69,6 +84,29 @@ final class AccessibilityElement {
     return try AccessibilityElement(elementReference)
   }
 
+  private func application() -> AccessibilityElement? {
+    var element: AccessibilityElement? = self
+    while element != nil, element?.role != kAXApplicationRole {
+      if let nextElement: AccessibilityElement = element?.parent {
+        element = nextElement
+      } else {
+        element = nil
+      }
+    }
+    return element
+  }
+
+  private func isEnhancedUserInterfaceEnabled() -> Bool? {
+    var rawValue: AnyObject?
+    let error = AXUIElementCopyAttributeValue(self.elementReference, kAXEnhancedUserInterface as CFString, &rawValue)
+
+    if error == .success && CFGetTypeID(rawValue) == CFBooleanGetTypeID() {
+      return CFBooleanGetValue((rawValue as! CFBoolean))
+    }
+
+    return nil
+  }
+
   private func find() -> AccessibilityElement? {
     var element: AccessibilityElement? = self
     while element != nil, element?.role != kAXWindowRole {
@@ -86,11 +124,11 @@ final class AccessibilityElement {
   }
 
   private func value<T>(for attribute: NSAccessibility.Attribute) -> T? {
-      if let rawValue = self.rawValue(for: attribute), CFGetTypeID(rawValue) == AXValueGetTypeID() {
-          return (rawValue as! AXValue).toValue()
-      }
+    if let rawValue = self.rawValue(for: attribute), CFGetTypeID(rawValue) == AXValueGetTypeID() {
+      return (rawValue as! AXValue).toValue()
+    }
 
-      return nil
+    return nil
   }
 
   private func rawValue(for attribute: NSAccessibility.Attribute) -> AnyObject? {

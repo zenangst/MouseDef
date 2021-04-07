@@ -16,8 +16,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: "com.zenangst.MouseDef"
-        MARKETING_VERSION: "0.0.4"
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "0.0.5"
+        CURRENT_PROJECT_VERSION: 10
         INFOPLIST_FILE: "Resources/Info.plist"
         ASSETCATALOG_COMPILER_APPICON_NAME: "Assets"
         DEVELOPMENT_TEAM: "E23HUP39A3"
