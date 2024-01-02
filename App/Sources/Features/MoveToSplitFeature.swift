@@ -42,13 +42,13 @@ final class MoveToSplitFeature: MoveFeature {
     self.newFrame = nil
   }
   
-  func evaluate(_ screen: NSScreen, element: AXEssibility.WindowAccessibilityElement) {
+  func evaluate(_ screen: NSScreen, newFrame: CGRect, element: AXEssibility.WindowAccessibilityElement) {
     let screenRect = screen.frame
     let mouseLocation = Mouse().location
     let leftField = screen.frame.maxX - screen.visibleFrame.maxX
 
-    let isLeftSide = mouseLocation.x - 20 <= leftField
-    let isRightSide = mouseLocation.x >= screen.frame.maxX - 10
+    let isLeftSide = newFrame.origin.x + 50 <= leftField
+    let isRightSide = newFrame.maxX >= screen.frame.maxX + 50
 
     if !shouldRun, isLeftSide {
       // Mouse is in the left field
@@ -64,7 +64,7 @@ final class MoveToSplitFeature: MoveFeature {
       }
       shouldRun = true
       shouldRestore = true
-      newFrame = frame
+      self.newFrame = frame
     } else if !shouldRun, isRightSide {
       // Mouse is in the right field
       let frame = CGRect(
@@ -79,7 +79,7 @@ final class MoveToSplitFeature: MoveFeature {
       }
       shouldRun = true
       shouldRestore = true
-      newFrame = frame
+      self.newFrame = frame
     } else if shouldRun, !isLeftSide && !isRightSide {
       shouldRestore = false
       shouldRun = false

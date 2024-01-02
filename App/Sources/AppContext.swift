@@ -20,10 +20,8 @@ final class AppContext {
 
   func start() {
     guard let machPort else { return }
-    coordinator?.end()
     coordinator = nil
 
-    let coordinator = MachPortCoordinator()
     let systemElement = SystemAccessibilityElement()
     let publishers = WindowPublishers(windowBorderViewPublisher: .init())
     let resizeBehavior: MouseResizeBehavior = .quadrant
@@ -37,7 +35,7 @@ final class AppContext {
     var elementWindow: WindowAccessibilityElement?
     var lastQuadrant: Quadrant?
 
-    coordinator.subscribe(to: machPort.$flagsChanged, to: machPort.$event) { state, initialMouseLocation in
+    let coordinator = MachPortCoordinator(machPort) { state, initialMouseLocation in
       guard let screen = NSScreen.main else { return }
 
       if elementWindow == nil {
@@ -50,8 +48,6 @@ final class AppContext {
 
       switch state {
       case .ended:
-        windowCoordinator?.close()
-        windowCoordinator = nil
         if let elementWindow {
           if let enhancedUserInterface {
             elementWindow.app?.enhancedUserInterface = enhancedUserInterface
@@ -66,6 +62,8 @@ final class AppContext {
         enhancedUserInterface = nil
         elementWindow = nil
         lastQuadrant = nil
+        windowCoordinator?.close()
+        windowCoordinator = nil
       case .resize:
         guard let elementWindow, var elementRect = elementWindow.frame else { return }
 
@@ -101,7 +99,7 @@ final class AppContext {
         moveFeatures.filter(\.isEnabled)
           .forEach { feature in
             feature.restore(elementWindow, frame: &newFrame)
-            feature.evaluate(screen, element: elementWindow)
+            feature.evaluate(screen, newFrame: newFrame, element: elementWindow)
           }
 
         if elementRect.origin != newFrame.origin {

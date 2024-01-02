@@ -38,12 +38,12 @@ final class MoveToFullscreenFeature: MoveFeature {
   }
 
   @MainActor
-  func evaluate(_ screen: NSScreen, element: WindowAccessibilityElement) {
+  func evaluate(_ screen: NSScreen, newFrame: CGRect, element: WindowAccessibilityElement) {
     let screenRect = screen.frame
     let mouseLocation = Mouse().location
-    let topField = screen.frame.maxX - screen.visibleFrame.maxX
+    let topField = screen.frame.maxY - screen.visibleFrame.maxY
 
-    if mouseLocation.y <= topField {
+    if newFrame.origin.y < topField || mouseLocation.y <= topField {
       var fullscreen = screenRect
       fullscreen.origin.y = topField
       fullscreen.size.height -= topField

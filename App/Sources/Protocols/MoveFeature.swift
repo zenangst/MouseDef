@@ -12,5 +12,5 @@ protocol MoveFeature: Identifiable {
   @MainActor
   func run(_ element: WindowAccessibilityElement)
   @MainActor
-  func evaluate(_ screen: NSScreen, element: WindowAccessibilityElement)
+  func evaluate(_ screen: NSScreen, newFrame: CGRect, element: WindowAccessibilityElement)
 }

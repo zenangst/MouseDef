@@ -10,6 +10,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
   case control = "^"
   case option = "~"
   case command = "@"
+  case leftMouseButton = "ml"
+  case rightMouseButton = "mr"
 
   static var allCases: [ModifierKey] {
     return [.function, .shift, .control, .option, .command]
@@ -22,6 +24,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
     case .control: ""
     case .option: ""
     case .command: ""
+    case .leftMouseButton: ""
+    case .rightMouseButton: ""
     }
   }
 
@@ -32,6 +36,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
     case .control:  "Control"
     case .option:   "Option"
     case .command:  "Command"
+    case .leftMouseButton: "Left Mouse Button"
+    case .rightMouseButton: "Right Mouse Button"
     }
   }
 
@@ -41,6 +47,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
     case .control:          "control"
     case .option:           "option"
     case .command:          "command"
+    case .leftMouseButton:  "leftMouseButton"
+    case .rightMouseButton:  "rightMouseButton"
     }
   }
 
@@ -51,6 +59,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
     case .control:  "⌃"
     case .option:   "⌥"
     case .command:  "⌘"
+    case .leftMouseButton: ""
+    case .rightMouseButton: ""
     }
   }
 
@@ -61,16 +71,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
     case .control: "⌃"
     case .option:  "⌥"
     case .command: "⌘"
-    }
-  }
-
-  var nsModifierFlags: NSEvent.ModifierFlags {
-    switch self {
-    case .shift:    .shift
-    case .control:  .control
-    case .option:   .option
-    case .command:  .command
-    case .function: .function
+    case .leftMouseButton: ""
+    case .rightMouseButton: ""
     }
   }
 
@@ -81,6 +83,8 @@ enum ModifierKey: String, Codable, Hashable, Identifiable, Sendable {
     case .option:   .maskAlternate
     case .command:  .maskCommand
     case .function: .maskSecondaryFn
+    case .leftMouseButton: .init(rawValue: 0)
+    case .rightMouseButton: .init(rawValue: 0)
     }
   }
 }
