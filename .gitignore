@@ -1,39 +1,24 @@
-*.dSYM.zip
-*.ipa
-
-*.log
-npm-debug.log*
-
-node_modules
-.idea/
-
-## test coverage files
-coverage
-js-coverage.zip
-
-## Build Generated
-DerivedData/
-
-## Apple things
-.DS_Store
-*.swp
-profile
-*~.nib
-
-## Various Settings
-xcuserdata/
-*.xcuserstate
-
-# Merge files
-*.orig
-
-# Local config
-*.local.plist
-*-local.js
-
 *.xcodeproj
 *.xcworkspace
-Pods/
+.DS_Store
 .env
-Build/
+Build/*.xcarchive
+Build/Releases/*
+Derived
+Generated/*
+Keyboard-Cowboy.xcodeproj/project.*
+Keyboard-Cowboy.xcodeproj/xcshareddata/xcschemes/*
+Keyboard-Cowboy.xcodeproj/xcuserdata/*
+Release/*.app
+Release/*.zip
+Release/.*
+Tuist/Dependencies/Lockfiles/Package.resolved
+Tuist/Dependencies/SwiftPackageManager
+Tuist/Dependencies/SwiftPackageManager/*
+Tuist/Dependencies/graph.json
 exportOptions.plist
+Build/*.xcarchive
+Build/Releases/*
+ResultBundle.xcresult
+Sparkle/*
+.package.resolved
