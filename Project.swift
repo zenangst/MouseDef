@@ -51,10 +51,10 @@ let project = Project(
             "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
             "CODE_SIGN_IDENTITY": "Apple Development",
             "CODE_SIGN_STYLE": "Automatic",
-            "CURRENT_PROJECT_VERSION": "148",
+            "CURRENT_PROJECT_VERSION": "153",
             "DEVELOPMENT_TEAM": env["TEAM_ID"],
             "ENABLE_HARDENED_RUNTIME": true,
-            "MARKETING_VERSION": "1.0.0rc8",
+            "MARKETING_VERSION": "1.0.0rc9",
             "PRODUCT_NAME": "MouseDef"
           ],
           configurations: [
