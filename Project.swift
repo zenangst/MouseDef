@@ -44,6 +44,7 @@ let project = Project(
         .package(product: "Bonzai"),
         .package(product: "MachPort"),
         .package(product: "Sparkle"),
+        .package(product: "Windows"),
       ],
       settings:
         Settings.settings(
@@ -51,10 +52,10 @@ let project = Project(
             "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
             "CODE_SIGN_IDENTITY": "Apple Development",
             "CODE_SIGN_STYLE": "Automatic",
-            "CURRENT_PROJECT_VERSION": "153",
+            "CURRENT_PROJECT_VERSION": "173",
             "DEVELOPMENT_TEAM": env["TEAM_ID"],
             "ENABLE_HARDENED_RUNTIME": true,
-            "MARKETING_VERSION": "1.0.0rc9",
+            "MARKETING_VERSION": "1.0.0rc10",
             "PRODUCT_NAME": "MouseDef"
           ],
           configurations: [
@@ -116,6 +117,7 @@ public enum PackageResolver {
         .package(path: "../AXEssibility"),
         .package(path: "../Bonzai"),
         .package(path: "../MachPort"),
+        .package(path: "../Windows"),
         .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.4.1"),
       ]
     } else {
@@ -123,6 +125,7 @@ public enum PackageResolver {
         .package(url: "https://github.com/zenangst/AXEssibility.git", from: "0.0.14"),
         .package(url: "https://github.com/zenangst/Bonzai.git", .revision("f47ac9c060e880db9393880f198c334d33320702")),
         .package(url: "https://github.com/zenangst/MachPort.git", from: "3.0.3"),
+        .package(url: "https://github.com/zenangst/Windows.git", from: "1.0.0"),
         .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.4.1"),
       ]
     }

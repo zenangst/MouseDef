@@ -2,7 +2,7 @@ import AXEssibility
 import Cocoa
 import SwiftUI
 
-final class MoveToFullscreenFeature: MoveFeature {
+final class SnapToFullscreenFeature: MoveFeature {
   private var sizeCache = [CGWindowID: CGRect]()
   var id: String { "moveToFullscreen" }
   var isEnabled: Bool { true }
@@ -10,9 +10,11 @@ final class MoveToFullscreenFeature: MoveFeature {
   var shouldRestore: Bool = false
 
   let publisher: WindowBorderViewPublisher
+  let autohideDockFeature: AutoHideDockFeature
 
-  init(_ publisher: WindowBorderViewPublisher) {
+  init(_ publisher: WindowBorderViewPublisher, autohideDockFeature: AutoHideDockFeature) {
     self.publisher = publisher
+    self.autohideDockFeature = autohideDockFeature
   }
 
   @MainActor
@@ -32,7 +34,12 @@ final class MoveToFullscreenFeature: MoveFeature {
   func run(_ element: WindowAccessibilityElement) {
     guard shouldRun else { return }
     sizeCache[element.id] = element.frame
-    element.frame = NSScreen.main!.frame
+
+    Dock.hide()
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+      element.frame = NSScreen.main!.frame
+    }
+
     shouldRun = false
     publisher.publish([])
   }

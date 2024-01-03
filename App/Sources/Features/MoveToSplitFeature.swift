@@ -9,11 +9,12 @@ final class MoveToSplitFeature: MoveFeature {
   var shouldRestore: Bool = false
 
   var newFrame: CGRect?
-
   let publisher: WindowBorderViewPublisher
+  let autohideDockFeature: AutoHideDockFeature
 
-  init(_ publisher: WindowBorderViewPublisher) {
+  init(_ publisher: WindowBorderViewPublisher, autohideDockFeature: AutoHideDockFeature) {
     self.publisher = publisher
+    self.autohideDockFeature = autohideDockFeature
   }
 
   func restore(_ element: AXEssibility.WindowAccessibilityElement, frame: inout CGRect) {
@@ -44,17 +45,21 @@ final class MoveToSplitFeature: MoveFeature {
   
   func evaluate(_ screen: NSScreen, newFrame: CGRect, element: AXEssibility.WindowAccessibilityElement) {
     let screenRect = screen.frame
-    let mouseLocation = Mouse().location
     let leftField = screen.frame.maxX - screen.visibleFrame.maxX
-
     let isLeftSide = newFrame.origin.x + 50 <= leftField
     let isRightSide = newFrame.maxX >= screen.frame.maxX + 50
+
+    let (leftXOffset, rightXOffset): (CGFloat, CGFloat) = switch (Dock.state, Dock.position) {
+    case (.shown, .left):  (abs(screen.visibleFrame.width - screen.frame.width), 0)
+    case (.shown, .right): (0, abs(screen.visibleFrame.width - screen.frame.width))
+    default: (0,0)
+    }
 
     if !shouldRun, isLeftSide {
       // Mouse is in the left field
       let frame = CGRect(
-        x: 0, y: 0,
-        width: screenRect.width / 2, height: screenRect.height
+        x: leftXOffset, y: 0,
+        width: screenRect.width / 2 - leftXOffset, height: screenRect.height
       )
       withAnimation {
         publisher.publish([
@@ -69,7 +74,7 @@ final class MoveToSplitFeature: MoveFeature {
       // Mouse is in the right field
       let frame = CGRect(
         x: screenRect.width / 2, y: 0,
-        width: screenRect.width / 2, height: screenRect.height
+        width: screenRect.width / 2 - rightXOffset, height: screenRect.height
       )
       withAnimation {
         publisher.publish([

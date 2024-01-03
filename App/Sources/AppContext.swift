@@ -25,9 +25,13 @@ final class AppContext {
     let systemElement = SystemAccessibilityElement()
     let publishers = WindowPublishers(windowBorderViewPublisher: .init())
     let resizeBehavior: MouseResizeBehavior = .quadrant
+
+    lazy var autoHideDockFeature = AutoHideDockFeature()
+
     let moveFeatures: [any MoveFeature] = [
-      MoveToFullscreenFeature(publishers.windowBorderViewPublisher),
-      MoveToSplitFeature(publishers.windowBorderViewPublisher),
+      SnapToFullscreenFeature(publishers.windowBorderViewPublisher, autohideDockFeature: autoHideDockFeature),
+      MoveToSplitFeature(publishers.windowBorderViewPublisher, autohideDockFeature: autoHideDockFeature),
+      autoHideDockFeature
     ]
 
     var windowCoordinator: WindowCoordinator<WindowOverlayContainerView>?
@@ -79,6 +83,11 @@ final class AppContext {
                                  lastQuadrant: &lastQuadrant,
                                  delta: &initialMouseLocation
         )
+
+        // This should be moved into a resize protocol.
+        if autoHideDockFeature.isEnabled {
+          autoHideDockFeature.run(elementWindow)
+        }
 
         if elementWindow.frame != elementRect {
           elementWindow.frame = elementRect
