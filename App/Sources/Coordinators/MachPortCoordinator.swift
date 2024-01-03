@@ -54,6 +54,8 @@ final class MachPortCoordinator {
     eventSubscription = machPort.$event
       .compactMap { $0 }
       .sink { machPortEvent in
+        guard !modifiers.isEmpty else { return }
+
         switch machPortEvent.type {
         case .leftMouseUp:
           if moveModifiers.contains(.leftMouseButton) || resizeModifiers.contains(.leftMouseButton) {
