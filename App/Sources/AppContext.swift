@@ -39,6 +39,8 @@ final class AppContext {
     var elementWindow: WindowAccessibilityElement?
     var lastQuadrant: Quadrant?
 
+    var ephemeralFrame: CGRect?
+
     let coordinator = MachPortCoordinator(machPort) { state, initialMouseLocation in
       guard let screen = NSScreen.main else { return }
 
@@ -68,8 +70,23 @@ final class AppContext {
         lastQuadrant = nil
         windowCoordinator?.close()
         windowCoordinator = nil
+        ephemeralFrame = nil
       case .resize:
-        guard let elementWindow, var elementRect = elementWindow.frame else { return }
+        guard let elementWindow else { return }
+
+        var elementRect: CGRect
+        let previousRect: CGRect
+        if let ephemeralFrame {
+          elementRect = ephemeralFrame
+          previousRect = ephemeralFrame
+        } else {
+          guard let resolvedRect = elementWindow.frame else {
+            return
+          }
+          elementRect = resolvedRect
+          ephemeralFrame = elementRect
+          previousRect = elementRect
+        }
 
         if enhancedUserInterface == nil, let app = elementWindow.app  {
           enhancedUserInterface = app.enhancedUserInterface
@@ -84,13 +101,18 @@ final class AppContext {
                                  delta: &initialMouseLocation
         )
 
-        // This should be moved into a resize protocol.
-        if autoHideDockFeature.isEnabled {
-          autoHideDockFeature.run(elementWindow)
-        }
 
-        if elementWindow.frame != elementRect {
-          elementWindow.frame = elementRect
+        if previousRect != elementRect {
+          elementWindow.size = elementRect.size
+          if previousRect.origin != elementRect.origin {
+            elementWindow.position = elementRect.origin
+          }
+          ephemeralFrame = elementRect
+
+          // This should be moved into a resize protocol.
+          if autoHideDockFeature.isEnabled {
+            autoHideDockFeature.evaluate(screen, newFrame: elementRect, element: elementWindow)
+          }
         }
         initialMouseLocation = mouse.location
       case .move:

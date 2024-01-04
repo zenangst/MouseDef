@@ -30,11 +30,15 @@ final class MoveToSplitFeature: MoveFeature {
   func run(_ element: AXEssibility.WindowAccessibilityElement) {
     guard let newFrame = newFrame, shouldRun else { return }
     sizeCache[element.id] = element.frame
-    element.frame = newFrame
 
-    if let adjustedFrame = element.frame, let screen = NSScreen.main {
-      if adjustedFrame.maxX > screen.frame.maxX {
-        element.frame?.origin.x = screen.frame.maxX - element.frame!.width
+    Dock.hide()
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+      element.frame = newFrame
+
+      if let adjustedFrame = element.frame, let screen = NSScreen.main {
+        if adjustedFrame.maxX > screen.frame.maxX {
+          element.frame?.origin.x = screen.frame.maxX - element.frame!.width
+        }
       }
     }
 

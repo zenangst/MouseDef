@@ -116,7 +116,11 @@ final class MachPortCoordinator {
             }
           }
         case .mouseMoved:
+          let deltaX = machPortEvent.event.getDoubleValueField(.mouseEventDeltaX)
+          let deltaY = machPortEvent.event.getDoubleValueField(.mouseEventDeltaY)
+
           if (moveModifiers == moveModifiersWithoutMouse && moveModifiersWithoutMouse == modifiers) {
+            guard deltaX != 0 || deltaY != 0 else { return }
             onEvent(.move, &initialMouseLocation)
           } else if (resizeModifiers == resizeModifiersWithoutMouse && resizeModifiersWithoutMouse == modifiers) {
             onEvent(.resize, &initialMouseLocation)
