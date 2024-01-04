@@ -1,4 +1,4 @@
 enum MouseResizeBehavior: String {
-  case standard
-  case quadrant
+  case standard = "Standard"
+  case quadrant = "Quadrant"
 }

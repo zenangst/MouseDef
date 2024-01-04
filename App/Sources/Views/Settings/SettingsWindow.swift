@@ -2,10 +2,11 @@ import SwiftUI
 
 struct SettingsWindow: Scene {
   @Environment(\.controlActiveState) var controlActiveState
+  @State var tab: SettingsTab = .general
 
   var body: some Scene {
     WindowGroup(id: .settings) {
-      SettingsView()
+      SettingsView(tab: $tab)
         .onAppear {
           guard !MouseDef.isRunningPreview else { return }
           NSApp.setActivationPolicy(.regular)
@@ -15,9 +16,16 @@ struct SettingsWindow: Scene {
           NSApp.setActivationPolicy(.accessory)
         }
         .toolbar(content: {
-          ToolbarItem(id: UUID().uuidString) {
-            Text("MouseDef")
-              .grayscale(grayscale())
+          ToolbarItem(placement: .principal) {
+            Picker(selection: $tab) {
+              ForEach(SettingsTab.allCases) { tab in
+                Button(action: { self.tab = tab }, label: { Text(tab.rawValue) })
+                  .tag(tab)
+              }
+            } label: {
+              Text(tab.rawValue)
+            }
+            .pickerStyle(.segmented)
           }
 
           ToolbarItem {
@@ -45,7 +53,6 @@ struct SettingsWindow: Scene {
           }
         })
     }
-    .windowStyle(.hiddenTitleBar)
     .windowResizability(.contentSize)
     .windowToolbarStyle(.unified)
   }

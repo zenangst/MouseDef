@@ -4,7 +4,7 @@ import SwiftUI
 final class MoveToSplitFeature: MoveFeature {
   private var sizeCache = [CGWindowID: CGRect]()
   var id: String { "moveToSplit" }
-  var isEnabled: Bool { true }
+  var isEnabled: Bool { AppSettings.shared.moveToSplitFeature }
   var shouldRun: Bool = false
   var shouldRestore: Bool = false
 

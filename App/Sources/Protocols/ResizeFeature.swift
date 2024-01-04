@@ -1,8 +1,7 @@
 import AXEssibility
 import Cocoa
-import Foundation
 
-protocol MoveFeature: Identifiable {
+protocol ResizeFeature {
   @MainActor
   var isEnabled: Bool { get }
   var shouldRun: Bool { get }

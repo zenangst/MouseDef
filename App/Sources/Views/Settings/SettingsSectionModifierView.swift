@@ -11,33 +11,14 @@ struct SettingsSectionModifierView: View {
       SettingsSectionModifierItemView(data: $data, color: color, modifier: .function)
       SettingsSectionModifierItemView(data: $data, color: color, modifier: .option)
       SettingsSectionModifierItemView(data: $data, color: color, modifier: .command)
-      Menu {
-        Button(action: {
-          data = data.replacingOccurrences(of: "ml", with: "")
-          data = data.replacingOccurrences(of: "mr", with: "")
-        }, label: { Text("None") })
-
-        Button(action: {
-          data = data.replacingOccurrences(of: "mr", with: "")
-          data.append("ml")
-        }, label: { Text("Left Mouse Button") })
-
-        Button(action: {
-          data = data.replacingOccurrences(of: "ml", with: "")
-          data.append("mr")
-        }, label: { Text("Right Mouse Button") })
-
-      } label: {
-        if data.contains("ml") {
-          Text("Left Mouse Button")
-        } else if data.contains("mr") {
-          Text("Right Mouse Button")
-        } else {
-          Text("None")
-        }
-      }
-      .menuStyle(.regular)
-
+    }
+    .padding(8)
+    .background()
+    .clipShape(RoundedRectangle(cornerRadius: 8))
+    .overlay {
+      RoundedRectangle(cornerRadius: 8)
+        .stroke(Color(nsColor: color.nsColor), lineWidth: 1.0)
+        .opacity(0.1)
     }
   }
 }

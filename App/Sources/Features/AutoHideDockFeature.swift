@@ -4,12 +4,12 @@ import Foundation
 import SwiftUI
 import Windows
 
-final class AutoHideDockFeature: MoveFeature {
+final class AutoHideDockFeature: MoveFeature, ResizeFeature {
   @MainActor
   var cachedDockState: Dock = Dock.state
   var cachedRects = [Int: CGRect]()
 
-  var isEnabled: Bool { true }
+  var isEnabled: Bool { AppSettings.shared.autoHideDockFeature }
   var shouldRun: Bool { false }
   var shouldRestore: Bool = false
 

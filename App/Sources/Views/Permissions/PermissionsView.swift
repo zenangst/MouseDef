@@ -23,7 +23,7 @@ struct PermissionsView: View {
       }
     }
     .roundedContainer()
-    .frame(width: 350)
+    .frame(minWidth: 350)
   }
 }
 
@@ -80,5 +80,6 @@ fileprivate struct PermissionOverviewItem: View {
 struct PermissionsOverview_Previews: PreviewProvider {
   static var previews: some View {
     PermissionsView()
+      .background()
   }
 }

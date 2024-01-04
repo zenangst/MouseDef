@@ -5,7 +5,7 @@ import SwiftUI
 final class SnapToFullscreenFeature: MoveFeature {
   private var sizeCache = [CGWindowID: CGRect]()
   var id: String { "moveToFullscreen" }
-  var isEnabled: Bool { true }
+  var isEnabled: Bool { AppSettings.shared.snapToFullscreenFeature }
   var shouldRun: Bool = false
   var shouldRestore: Bool = false
 

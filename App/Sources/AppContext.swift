@@ -24,7 +24,7 @@ final class AppContext {
 
     let systemElement = SystemAccessibilityElement()
     let publishers = WindowPublishers(windowBorderViewPublisher: .init())
-    let resizeBehavior: MouseResizeBehavior = .quadrant
+    let resizeBehavior: MouseResizeBehavior = AppSettings.shared.mouseResizeBehavior
 
     lazy var autoHideDockFeature = AutoHideDockFeature()
 
@@ -34,11 +34,14 @@ final class AppContext {
       autoHideDockFeature
     ]
 
+    let resizeFeatures: [any ResizeFeature] = [
+      autoHideDockFeature
+    ]
+
     var windowCoordinator: WindowCoordinator<WindowOverlayContainerView>?
     var enhancedUserInterface: Bool?
     var elementWindow: WindowAccessibilityElement?
     var lastQuadrant: Quadrant?
-
     var ephemeralFrame: CGRect?
 
     let coordinator = MachPortCoordinator(machPort) { state, initialMouseLocation in
@@ -103,16 +106,17 @@ final class AppContext {
 
 
         if previousRect != elementRect {
+          resizeFeatures.filter(\.isEnabled)
+            .forEach { $0.restore(elementWindow, frame: &elementRect) }
+
           elementWindow.size = elementRect.size
           if previousRect.origin != elementRect.origin {
             elementWindow.position = elementRect.origin
           }
           ephemeralFrame = elementRect
 
-          // This should be moved into a resize protocol.
-          if autoHideDockFeature.isEnabled {
-            autoHideDockFeature.evaluate(screen, newFrame: elementRect, element: elementWindow)
-          }
+          resizeFeatures.filter(\.isEnabled)
+            .forEach { $0.evaluate(screen, newFrame: elementRect, element: elementWindow) }
         }
         initialMouseLocation = mouse.location
       case .move:

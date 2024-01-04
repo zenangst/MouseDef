@@ -9,6 +9,7 @@ import SwiftUI
   var body: some Scene {
     AppMenuExtras {
       guard !MouseDef.isRunningPreview else { return }
+
       switch AccessibilityPermission.shared.checkPermission() {
       case .authorized:
         AppContext.shared.start()
@@ -23,6 +24,7 @@ import SwiftUI
       }
     }
     // Restart the application context when the settings change.
+    .onChange(of: settings.mouseResizeBehavior) { _ in AppContext.shared.start() }
     .onChange(of: settings.hotspotsModifiers) { _ in AppContext.shared.start() }
     .onChange(of: settings.moveWindowModifiers) { _ in AppContext.shared.start() }
     .onChange(of: settings.resizeWindowModifiers) { _ in AppContext.shared.start() }
