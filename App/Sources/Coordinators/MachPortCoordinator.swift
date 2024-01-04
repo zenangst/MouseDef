@@ -34,102 +34,97 @@ final class MachPortCoordinator {
     let resizeModifiersWithoutMouse = resizeModifiers.filter({ !mouseModifiers.contains($0) })
 
     var modifiers: Set<ModifierKey> = []
-    flagsChangedSubscription = machPort.$flagsChanged
-      .compactMap { $0 }
-      .sink { flags in
-        modifiers.removeAll()
+    machPort.onFlagsChanged = { flags in 
+      modifiers.removeAll()
 
-        if flags.contains(.maskShift) { modifiers.insert(.shift) }
-        if flags.contains(.maskControl) { modifiers.insert(.control) }
-        if flags.contains(.maskAlternate) { modifiers.insert(.option) }
-        if flags.contains(.maskCommand) { modifiers.insert(.command) }
-        if flags.contains(.maskSecondaryFn) { modifiers.insert(.function) }
+      if flags.contains(.maskShift) { modifiers.insert(.shift) }
+      if flags.contains(.maskControl) { modifiers.insert(.control) }
+      if flags.contains(.maskAlternate) { modifiers.insert(.option) }
+      if flags.contains(.maskCommand) { modifiers.insert(.command) }
+      if flags.contains(.maskSecondaryFn) { modifiers.insert(.function) }
 
-        if modifiers.isEmpty {
-          onEvent(.ended, &initialMouseLocation)
-        }
-        initialMouseLocation = Mouse().location
+      if modifiers.isEmpty {
+        onEvent(.ended, &initialMouseLocation)
       }
+      initialMouseLocation = Mouse().location
+    }
 
-    eventSubscription = machPort.$event
-      .compactMap { $0 }
-      .sink { machPortEvent in
-        guard !modifiers.isEmpty else { return }
+    machPort.onEventChange = { machPortEvent in
+      guard !modifiers.isEmpty else { return }
 
-        switch machPortEvent.type {
-        case .leftMouseUp:
-          if moveModifiers.contains(.leftMouseButton) || resizeModifiers.contains(.leftMouseButton) {
-            let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.leftMouseButton)
-            let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.leftMouseButton)
+      switch machPortEvent.type {
+      case .leftMouseUp:
+        if moveModifiers.contains(.leftMouseButton) || resizeModifiers.contains(.leftMouseButton) {
+          let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.leftMouseButton)
+          let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.leftMouseButton)
 
-            if moveIsActive || resizeIsActive {
-              machPortEvent.result = nil
-              onEvent(.ended, &initialMouseLocation)
-            }
+          if moveIsActive || resizeIsActive {
+            machPortEvent.result = nil
+            onEvent(.ended, &initialMouseLocation)
           }
-        case .rightMouseUp:
-          if moveModifiers.contains(.rightMouseButton) || resizeModifiers.contains(.rightMouseButton) {
-            let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.rightMouseButton)
-            let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.rightMouseButton)
+        }
+      case .rightMouseUp:
+        if moveModifiers.contains(.rightMouseButton) || resizeModifiers.contains(.rightMouseButton) {
+          let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.rightMouseButton)
+          let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.rightMouseButton)
 
-            if moveIsActive || resizeIsActive {
-              machPortEvent.result = nil
-              onEvent(.ended, &initialMouseLocation)
-            }
+          if moveIsActive || resizeIsActive {
+            machPortEvent.result = nil
+            onEvent(.ended, &initialMouseLocation)
           }
-        case .leftMouseDown, .leftMouseDragged:
-          if moveModifiers.contains(.leftMouseButton) || resizeModifiers.contains(.leftMouseButton) {
-            var mouseLocation = Mouse().location
-            let deltaX = machPortEvent.event.getDoubleValueField(.mouseEventDeltaX)
-            let deltaY = machPortEvent.event.getDoubleValueField(.mouseEventDeltaY)
-            mouseLocation.x -= deltaX
-            mouseLocation.y -= deltaY
-
-            let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.leftMouseButton)
-            let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.leftMouseButton)
-
-            if moveIsActive {
-              machPortEvent.result = nil
-              onEvent(.move, &mouseLocation)
-            } else if resizeIsActive {
-              machPortEvent.result = nil
-              onEvent(.resize, &mouseLocation)
-            }
-          }
-        case .rightMouseDown, .rightMouseDragged:
-          if moveModifiers.contains(.rightMouseButton) || resizeModifiers.contains(.rightMouseButton) {
-            var mouseLocation = Mouse().location
-            let deltaX = machPortEvent.event.getDoubleValueField(.mouseEventDeltaX)
-            let deltaY = machPortEvent.event.getDoubleValueField(.mouseEventDeltaY)
-            mouseLocation.x -= deltaX
-            mouseLocation.y -= deltaY
-
-            let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.rightMouseButton)
-            let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.rightMouseButton)
-
-            if moveIsActive {
-              machPortEvent.result = nil
-              onEvent(.move, &mouseLocation)
-            } else if resizeIsActive {
-              machPortEvent.result = nil
-              onEvent(.resize, &mouseLocation)
-            }
-          }
-        case .mouseMoved:
+        }
+      case .leftMouseDown, .leftMouseDragged:
+        if moveModifiers.contains(.leftMouseButton) || resizeModifiers.contains(.leftMouseButton) {
+          var mouseLocation = Mouse().location
           let deltaX = machPortEvent.event.getDoubleValueField(.mouseEventDeltaX)
           let deltaY = machPortEvent.event.getDoubleValueField(.mouseEventDeltaY)
+          mouseLocation.x -= deltaX
+          mouseLocation.y -= deltaY
 
-          if (moveModifiers == moveModifiersWithoutMouse && moveModifiersWithoutMouse == modifiers) {
-            guard deltaX != 0 || deltaY != 0 else { return }
-            onEvent(.move, &initialMouseLocation)
-          } else if (resizeModifiers == resizeModifiersWithoutMouse && resizeModifiersWithoutMouse == modifiers) {
-            onEvent(.resize, &initialMouseLocation)
+          let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.leftMouseButton)
+          let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.leftMouseButton)
+
+          if moveIsActive {
+            machPortEvent.result = nil
+            onEvent(.move, &mouseLocation)
+          } else if resizeIsActive {
+            machPortEvent.result = nil
+            onEvent(.resize, &mouseLocation)
           }
-        default:
-          break
         }
-      }
+      case .rightMouseDown, .rightMouseDragged:
+        if moveModifiers.contains(.rightMouseButton) || resizeModifiers.contains(.rightMouseButton) {
+          var mouseLocation = Mouse().location
+          let deltaX = machPortEvent.event.getDoubleValueField(.mouseEventDeltaX)
+          let deltaY = machPortEvent.event.getDoubleValueField(.mouseEventDeltaY)
+          mouseLocation.x -= deltaX
+          mouseLocation.y -= deltaY
 
+          let moveIsActive = moveModifiersWithoutMouse == modifiers && moveModifiers.contains(.rightMouseButton)
+          let resizeIsActive = resizeModifiersWithoutMouse == modifiers && resizeModifiers.contains(.rightMouseButton)
+
+          if moveIsActive {
+            machPortEvent.result = nil
+            onEvent(.move, &mouseLocation)
+          } else if resizeIsActive {
+            machPortEvent.result = nil
+            onEvent(.resize, &mouseLocation)
+          }
+        }
+      case .mouseMoved:
+        let deltaX = machPortEvent.event.getDoubleValueField(.mouseEventDeltaX)
+        let deltaY = machPortEvent.event.getDoubleValueField(.mouseEventDeltaY)
+
+        if (moveModifiers == moveModifiersWithoutMouse && moveModifiersWithoutMouse == modifiers) {
+          guard deltaX != 0 || deltaY != 0 else { return }
+          onEvent(.move, &initialMouseLocation)
+        } else if (resizeModifiers == resizeModifiersWithoutMouse && resizeModifiersWithoutMouse == modifiers) {
+          onEvent(.resize, &initialMouseLocation)
+        }
+      default:
+        break
+      }
+    }
   }
 
   deinit {
