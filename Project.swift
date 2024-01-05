@@ -52,10 +52,10 @@ let project = Project(
             "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
             "CODE_SIGN_IDENTITY": "Apple Development",
             "CODE_SIGN_STYLE": "Automatic",
-            "CURRENT_PROJECT_VERSION": "212",
+            "CURRENT_PROJECT_VERSION": "223",
             "DEVELOPMENT_TEAM": env["TEAM_ID"],
             "ENABLE_HARDENED_RUNTIME": true,
-            "MARKETING_VERSION": "1.0.0rc13",
+            "MARKETING_VERSION": "1.0.0rc14",
             "PRODUCT_NAME": "MouseDef"
           ],
           configurations: [
@@ -124,7 +124,7 @@ public enum PackageResolver {
       packages = [
         .package(url: "https://github.com/zenangst/AXEssibility.git", from: "0.0.14"),
         .package(url: "https://github.com/zenangst/Bonzai.git", .revision("f47ac9c060e880db9393880f198c334d33320702")),
-        .package(url: "https://github.com/zenangst/MachPort.git", from: "3.1.0"),
+        .package(url: "https://github.com/zenangst/MachPort.git", from: "3.1.1"),
         .package(url: "https://github.com/zenangst/Windows.git", from: "1.0.0"),
         .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.4.1"),
       ]

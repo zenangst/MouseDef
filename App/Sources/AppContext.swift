@@ -7,6 +7,7 @@ import MachPort
 final class AppContext {
   static let shared = AppContext()
 
+  private var searching: Bool = false
   private var coordinator: MachPortCoordinator?
   private var machPort: MachPortEventController?
 
@@ -44,19 +45,23 @@ final class AppContext {
     var lastQuadrant: Quadrant?
     var ephemeralFrame: CGRect?
 
-    let coordinator = MachPortCoordinator(machPort) { state, initialMouseLocation in
-      guard let screen = NSScreen.main else { return }
+    let coordinator = MachPortCoordinator(machPort) { [weak self] state, initialMouseLocation in
+      guard let self, let screen = NSScreen.main else { return }
 
       if elementWindow == nil {
-        let resolvedWindow = systemElement.element(at: initialMouseLocation,
-                                                   as: AnyAccessibilityElement.self)?.window
+        searching = true
+        let resolvedWindow = findElement(at: initialMouseLocation, systemElement: systemElement)
+        searching = false
         elementWindow = resolvedWindow
+        windowCoordinator?.close()
         windowCoordinator = WindowCoordinator(.none, content: WindowOverlayContainerView(publishers: publishers))
+      } else {
         windowCoordinator?.show()
       }
 
       switch state {
       case .ended:
+        searching = false
         if let elementWindow {
           if let enhancedUserInterface {
             elementWindow.app?.enhancedUserInterface = enhancedUserInterface
@@ -171,5 +176,23 @@ final class AppContext {
     self.machPort = machPort
 
     return machPort
+  }
+
+  private func findElement(at location: CGPoint, systemElement: SystemAccessibilityElement) -> WindowAccessibilityElement? {
+    var location = location
+
+    if let element = systemElement.element(at: location,
+                                           as: AnyAccessibilityElement.self)?.window {
+      if element.window != nil {
+        return element
+      }
+    }
+
+    if location.y > 0 && searching {
+      location.y -= 32
+      return findElement(at: location, systemElement: systemElement)
+    } else {
+      return nil
+    }
   }
 }
