@@ -7,10 +7,10 @@ struct SettingsSectionModifierView: View {
 
   var body: some View {
     HStack(spacing: 16) {
-      SettingsSectionModifierItemView(data: $data, color: color, modifier: .shift)
-      SettingsSectionModifierItemView(data: $data, color: color, modifier: .function)
-      SettingsSectionModifierItemView(data: $data, color: color, modifier: .option)
-      SettingsSectionModifierItemView(data: $data, color: color, modifier: .command)
+      SettingsSectionModifierItemView($data, color: color, modifier: .shift)
+      SettingsSectionModifierItemView($data, color: color, modifier: .function)
+      SettingsSectionModifierItemView($data, color: color, modifier: .option)
+      SettingsSectionModifierItemView($data, color: color, modifier: .command)
     }
     .padding(8)
     .background()

@@ -27,7 +27,7 @@ final class AutoHideDockFeature: MoveFeature, ResizeFeature {
   }
 
   @MainActor
-  func run(_ newFrame: CGRect, id: Int) {
+  func run(_ newFrame: CGRect?, id: Int) {
     guard let activeScreen = NSScreen.screens.first(where: { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) })
     else { return }
 
@@ -46,7 +46,9 @@ final class AutoHideDockFeature: MoveFeature, ResizeFeature {
       } catch { return }
     }
 
-    cachedRects[id] = newFrame
+    if let newFrame {
+      cachedRects[id] = newFrame
+    }
 
     let rects = cachedRects.values
     let tileSize: Double = Dock.tileSize

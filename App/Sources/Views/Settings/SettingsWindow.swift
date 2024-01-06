@@ -9,6 +9,7 @@ struct SettingsWindow: Scene {
       SettingsView(tab: $tab)
         .onAppear {
           guard !MouseDef.isRunningPreview else { return }
+          NSWindow.allowsAutomaticWindowTabbing = false
           NSApp.setActivationPolicy(.regular)
         }
         .onDisappear {

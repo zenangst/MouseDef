@@ -4,7 +4,7 @@ import MachPort
 
 final class MachPortCoordinator {
   enum State: Equatable {
-    case resize, move, ended, hotspots
+    case resize, move, ended, hotspots, leftClickUp
   }
 
   private var flagsChangedSubscription: AnyCancellable?
@@ -50,7 +50,12 @@ final class MachPortCoordinator {
     }
 
     machPort.onEventChange = { machPortEvent in
-      guard !modifiers.isEmpty else { return }
+      guard !modifiers.isEmpty else {
+        if machPortEvent.type == .leftMouseUp {
+          onEvent(.leftClickUp, &initialMouseLocation)
+        }
+        return
+      }
 
       switch machPortEvent.type {
       case .leftMouseUp:

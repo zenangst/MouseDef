@@ -7,7 +7,7 @@ import MachPort
 final class AppContext {
   static let shared = AppContext()
 
-  private var searching: Bool = false
+  private var isSearchingForElement: Bool = false
   private var coordinator: MachPortCoordinator?
   private var machPort: MachPortEventController?
 
@@ -47,21 +47,24 @@ final class AppContext {
 
     let coordinator = MachPortCoordinator(machPort) { [weak self] state, initialMouseLocation in
       guard let self, let screen = NSScreen.main else { return }
+      
+      guard !isSearchingForElement else { return }
 
       if elementWindow == nil {
-        searching = true
+        isSearchingForElement = true
         let resolvedWindow = findElement(at: initialMouseLocation, systemElement: systemElement)
-        searching = false
+        isSearchingForElement = false
         elementWindow = resolvedWindow
         windowCoordinator?.close()
         windowCoordinator = WindowCoordinator(.none, content: WindowOverlayContainerView(publishers: publishers))
       } else {
         windowCoordinator?.show()
+        isSearchingForElement = false
       }
 
       switch state {
       case .ended:
-        searching = false
+        isSearchingForElement = false
         if let elementWindow {
           if let enhancedUserInterface {
             elementWindow.app?.enhancedUserInterface = enhancedUserInterface
@@ -124,6 +127,12 @@ final class AppContext {
             .forEach { $0.evaluate(screen, newFrame: elementRect, element: elementWindow) }
         }
         initialMouseLocation = mouse.location
+      case .leftClickUp:
+        if autoHideDockFeature.isEnabled {
+          elementWindow = nil
+          autoHideDockFeature.run(nil, id: -1)
+          autoHideDockFeature.cachedRects.removeAll()
+        }
       case .move:
         guard let elementWindow, let elementRect = elementWindow.frame else { return }
 
@@ -188,7 +197,7 @@ final class AppContext {
       }
     }
 
-    if location.y > 0 && searching {
+    if location.y > 0 && isSearchingForElement {
       location.y -= 32
       return findElement(at: location, systemElement: systemElement)
     } else {
