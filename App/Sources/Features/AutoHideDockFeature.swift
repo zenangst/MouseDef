@@ -4,7 +4,8 @@ import Foundation
 import SwiftUI
 import Windows
 
-final class AutoHideDockFeature: MoveFeature, ResizeFeature {
+final class AutoHideDockFeature: MoveFeature, ResizeFeature, @unchecked Sendable {
+  private var subscription: AnyCancellable?
   @MainActor
   var cachedDockState: Dock = Dock.state
   var cachedRects = [Int: CGRect]()
@@ -12,6 +13,20 @@ final class AutoHideDockFeature: MoveFeature, ResizeFeature {
   var isEnabled: Bool { AppSettings.shared.autoHideDockFeature }
   var shouldRun: Bool { false }
   var shouldRestore: Bool = false
+
+  init() {
+    subscription = NSWorkspace.shared.publisher(for: \.frontmostApplication)
+      .debounce(for: 0.3, scheduler: DispatchQueue.main)
+      .sink { [weak self] _ in
+        guard let self else { return }
+        Task.detached {
+          await MainActor.run {
+            guard self.isEnabled else { return }
+            self.run(nil, id: -1)
+          }
+        }
+      }
+  }
 
   func restore(_ element: AXEssibility.WindowAccessibilityElement, frame: inout CGRect) { }
 
