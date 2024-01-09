@@ -23,7 +23,7 @@ final class AppContext {
     guard let machPort else { return }
     coordinator = nil
 
-    let systemElement = SystemAccessibilityElement()
+    let systemElement = SystemAccessibilityElement(messagingTimeout: 1)
     let publishers = WindowPublishers(windowBorderViewPublisher: .init())
     let resizeBehavior: MouseResizeBehavior = AppSettings.shared.mouseResizeBehavior
 
