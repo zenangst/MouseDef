@@ -1,20 +1,32 @@
 import AXEssibility
+import Combine
 import Cocoa
+import Intercom
 import SwiftUI
 
-final class SnapToFullscreenFeature: MoveFeature {
+final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
   private var sizeCache = [CGWindowID: CGRect]()
+  private lazy var systemElement = SystemAccessibilityElement()
   var id: String { "moveToFullscreen" }
   var isEnabled: Bool { AppSettings.shared.snapToFullscreenFeature }
   var shouldRun: Bool = false
   var shouldRestore: Bool = false
+  var externalSubscription: AnyCancellable?
 
+  let intercom = Intercom(MouseDefIntercomApp.self)
   let publisher: WindowBorderViewPublisher
   let autohideDockFeature: AutoHideDockFeature
 
   init(_ publisher: WindowBorderViewPublisher, autohideDockFeature: AutoHideDockFeature) {
     self.publisher = publisher
     self.autohideDockFeature = autohideDockFeature
+
+    externalSubscription = intercom.receive(.snapToFullscreen, onRecieve: { [weak self] _ in
+      guard let self else { return }
+      DispatchQueue.main.async {
+        try? self.externalRun()
+      }
+    })
   }
 
   @MainActor
@@ -66,6 +78,70 @@ final class SnapToFullscreenFeature: MoveFeature {
       publisher.publish([])
       shouldRestore = false
       shouldRun = false
+    }
+  }
+
+  @MainActor
+  private func externalRun() throws {
+    guard let screen = NSScreen.main,
+          let frontmostApplication = NSWorkspace.shared.frontmostApplication else { return }
+    let app = AppAccessibilityElement(frontmostApplication.processIdentifier)
+    var previousValue: Bool = false
+    if app.enhancedUserInterface == true {
+      app.enhancedUserInterface = false
+      previousValue = true
+    }
+
+    var focusedElement: AnyFocusedAccessibilityElement
+    let focusedWindow: WindowAccessibilityElement?
+    do {
+      focusedElement = try systemElement.focusedUIElement()
+      if let focusedApp = focusedElement.app {
+        focusedWindow = try focusedApp.focusedWindow()
+      } else {
+        focusedWindow = try app.focusedWindow()
+      }
+    } catch {
+      let element = try app.focusedWindow()
+      focusedElement = AnyFocusedAccessibilityElement(element.reference)
+      focusedWindow = element
+    }
+
+    guard let focusedWindow else {
+      app.enhancedUserInterface = previousValue
+      return
+    }
+
+    let newFrame: CGRect
+    if let oldFrame = sizeCache[focusedWindow.id] {
+      // Reset an go back to fullscreen if the windows frame was changed
+      // between going fullscreen and restoring.
+      if let currentFrame = focusedWindow.frame {
+        let deltaWidth = screen.frame.size.width - currentFrame.width
+        if deltaWidth > 100 {
+          sizeCache[focusedWindow.id] = currentFrame
+          setNewFrame(screen.frame, to: focusedWindow, on: screen)
+          return
+        }
+      }
+
+      sizeCache[focusedWindow.id] = nil
+      newFrame = oldFrame
+    } else {
+      sizeCache[focusedWindow.id] = focusedWindow.frame
+      newFrame = screen.frame
+    }
+
+    setNewFrame(newFrame, to: focusedWindow, on: screen)
+  }
+
+  @MainActor
+  private func setNewFrame(_ newFrame: CGRect,
+                           to window: WindowAccessibilityElement,
+                           on screen: NSScreen) {
+    autohideDockFeature.evaluate(screen, newFrame: newFrame, element: window)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+      window.frame = newFrame
     }
   }
 }

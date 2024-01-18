@@ -3,23 +3,21 @@ import Cocoa
 private class AppleScript {
   static let shared: AppleScript = .init()
 
-  lazy var show: NSAppleScript = {
+  let show: NSAppleScript
+  let hide: NSAppleScript
+
+  private init() { 
+    self.hide = Self.compile("tell dock preferences to set autohide to true")
+    self.show = Self.compile("tell dock preferences to set autohide to not autohide")
+  }
+
+  static private func compile(_ source: String) -> NSAppleScript {
     var errorInfo: NSDictionary?
-    let source = Self.source("tell dock preferences to set autohide to not autohide")
+    let source = Self.source(source)
     let appleScript = NSAppleScript(source: source)!
     appleScript.compileAndReturnError(&errorInfo)
     return appleScript
-  }()
-
-  lazy var hide: NSAppleScript = {
-    var errorInfo: NSDictionary?
-    let source = Self.source("tell dock preferences to set autohide to true")
-    let appleScript = NSAppleScript(source: source)!
-    appleScript.compileAndReturnError(&errorInfo)
-    return appleScript
-  }()
-
-  private init() { }
+  }
 
   static private func source(_ contents: String) -> String {
     return """

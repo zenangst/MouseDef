@@ -43,6 +43,7 @@ let project = Project(
         .package(product: "AXEssibility"),
         .package(product: "Bonzai"),
         .package(product: "MachPort"),
+        .package(product: "Intercom"),
         .package(product: "Sparkle"),
         .package(product: "Windows"),
       ],
@@ -116,16 +117,18 @@ public enum PackageResolver {
       packages = [
         .package(path: "../AXEssibility"),
         .package(path: "../Bonzai"),
+        .package(path: "../Intercom"),
         .package(path: "../MachPort"),
         .package(path: "../Windows"),
         .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.4.1"),
       ]
     } else {
       packages = [
-        .package(url: "https://github.com/zenangst/AXEssibility.git", from: "0.0.14"),
-        .package(url: "https://github.com/zenangst/Bonzai.git", .revision("f47ac9c060e880db9393880f198c334d33320702")),
+        .package(url: "https://github.com/zenangst/AXEssibility.git", from: "0.0.16"),
+        .package(url: "https://github.com/zenangst/Bonzai.git", .revision("d88f535240a1d3730c112fb52f6753226bd5b4a3")),
         .package(url: "https://github.com/zenangst/MachPort.git", from: "3.1.1"),
-        .package(url: "https://github.com/zenangst/Windows.git", from: "1.0.0"),
+        .package(url: "https://github.com/zenangst/Intercom.git", .revision("7770b453f171c68961b0d4e5dc8ed1ddf0377762")),
+        .package(url: "https://github.com/zenangst/Windows.git", from: "1.1.0"),
         .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.4.1"),
       ]
     }
