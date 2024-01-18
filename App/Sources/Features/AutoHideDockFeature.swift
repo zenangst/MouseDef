@@ -1,21 +1,23 @@
 import AXEssibility
 import Combine
 import Foundation
+import Intercom
 import SwiftUI
 import Windows
 
 final class AutoHideDockFeature: MoveFeature, ResizeFeature, @unchecked Sendable {
-  private var subscription: AnyCancellable?
+  private var subscriptions = [AnyCancellable]()
   @MainActor
   var cachedDockState: Dock = Dock.state
   var cachedRects = [Int: CGRect]()
-
   var isEnabled: Bool { AppSettings.shared.autoHideDockFeature }
   var shouldRun: Bool { false }
   var shouldRestore: Bool = false
 
+  let intercom = Intercom(MouseDefIntercomApp.self)
+
   init() {
-    subscription = NSWorkspace.shared.publisher(for: \.frontmostApplication)
+    NSWorkspace.shared.publisher(for: \.frontmostApplication)
       .debounce(for: 0.3, scheduler: DispatchQueue.main)
       .sink { [weak self] _ in
         guard let self else { return }
@@ -26,6 +28,14 @@ final class AutoHideDockFeature: MoveFeature, ResizeFeature, @unchecked Sendable
           }
         }
       }
+      .store(in: &subscriptions)
+
+    intercom.receive(.autoHideDockIfNeeded) { _ in
+      Task { @MainActor in
+        self.run(nil, id: -1)
+      }
+    }
+    .store(in: &subscriptions)
   }
 
   func restore(_ element: AXEssibility.WindowAccessibilityElement, frame: inout CGRect) { }
