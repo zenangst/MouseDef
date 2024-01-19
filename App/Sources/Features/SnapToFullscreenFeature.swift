@@ -21,10 +21,11 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
     self.publisher = publisher
     self.autohideDockFeature = autohideDockFeature
 
-    externalSubscription = intercom.receive(.snapToFullscreen, onRecieve: { [weak self] _ in
+    externalSubscription = intercom.receive(.snapToFullscreen, onRecieve: { [weak self] notification in
+      let userInfo = notification.userInfo
       guard let self else { return }
       DispatchQueue.main.async {
-        try? self.externalRun()
+        try? self.externalRun(userInfo)
       }
     })
   }
@@ -82,7 +83,7 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
   }
 
   @MainActor
-  private func externalRun() throws {
+  private func externalRun(_ userInfo: [AnyHashable: Any]?) throws {
     guard let screen = NSScreen.main,
           let frontmostApplication = NSWorkspace.shared.frontmostApplication else { return }
     let app = AppAccessibilityElement(frontmostApplication.processIdentifier)
@@ -129,7 +130,17 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
       newFrame = oldFrame
     } else {
       sizeCache[focusedWindow.id] = focusedWindow.frame
-      newFrame = screen.frame
+
+      if let padding = userInfo?["padding"] as? CGFloat {
+        let yDelta = abs(screen.frame.height - screen.visibleFrame.height)
+        let size = CGSize(width: screen.frame.width - padding * 2,
+                          height: screen.visibleFrame.height - padding * 2)
+        let origin = CGPoint(x: screen.frame.minX + padding,
+                             y: screen.visibleFrame.minY + padding + yDelta)
+        newFrame = CGRect(origin: origin, size: size)
+      } else {
+        newFrame = screen.frame
+      }
     }
 
     setNewFrame(newFrame, to: focusedWindow, on: screen)
