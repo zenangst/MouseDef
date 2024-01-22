@@ -3,6 +3,7 @@ import Combine
 import Cocoa
 import Intercom
 import SwiftUI
+import Windows
 
 final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
   private var sizeCache = [CGWindowID: CGRect]()
@@ -23,9 +24,10 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
 
     externalSubscription = intercom.receive(.snapToFullscreen, onRecieve: { [weak self] notification in
       let userInfo = notification.userInfo
+      let padding = userInfo?["padding"] as? Int ?? 0
       guard let self else { return }
       DispatchQueue.main.async {
-        try? self.externalRun(userInfo)
+        try? self.externalRun(padding)
       }
     })
   }
@@ -45,12 +47,13 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
 
   @MainActor
   func run(_ element: WindowAccessibilityElement) {
-    guard shouldRun else { return }
+    guard shouldRun, let originalFrame = element.frame else { return }
     sizeCache[element.id] = element.frame
 
     Dock.hide()
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-      element.frame = NSScreen.main!.frame
+      let newFrame = WindowFullscreenCalculation.calculate(from: originalFrame, padding: 0)
+      element.frame = newFrame
     }
 
     shouldRun = false
@@ -83,7 +86,7 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
   }
 
   @MainActor
-  private func externalRun(_ userInfo: [AnyHashable: Any]?) throws {
+  private func externalRun(_ padding: Int) throws {
     guard let screen = NSScreen.main,
           let frontmostApplication = NSWorkspace.shared.frontmostApplication else { return }
     let app = AppAccessibilityElement(frontmostApplication.processIdentifier)
@@ -108,7 +111,7 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
       focusedWindow = element
     }
 
-    guard let focusedWindow else {
+    guard let focusedWindow, let originalFrame = focusedWindow.frame else {
       app.enhancedUserInterface = previousValue
       return
     }
@@ -130,17 +133,7 @@ final class SnapToFullscreenFeature: MoveFeature, @unchecked Sendable {
       newFrame = oldFrame
     } else {
       sizeCache[focusedWindow.id] = focusedWindow.frame
-
-      if let padding = userInfo?["padding"] as? CGFloat {
-        let yDelta = abs(screen.frame.height - screen.visibleFrame.height)
-        let size = CGSize(width: screen.frame.width - padding * 2,
-                          height: screen.visibleFrame.height - padding * 2)
-        let origin = CGPoint(x: screen.frame.minX + padding,
-                             y: screen.visibleFrame.minY + padding + yDelta)
-        newFrame = CGRect(origin: origin, size: size)
-      } else {
-        newFrame = screen.frame
-      }
+      newFrame = WindowFullscreenCalculation.calculate(from: originalFrame, padding: padding)
     }
 
     setNewFrame(newFrame, to: focusedWindow, on: screen)
